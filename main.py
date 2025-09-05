@@ -54,7 +54,7 @@ for page_id, page in pages.items():
 
     # Download and display image
     if url:
-        img_response = requests.get(url)
+        img_response = requests.get(url, headers=headers)
         if img_response.status_code == 200 and 'image' in img_response.headers.get('Content-Type', ''):
             try:
                 img = Image.open(BytesIO(img_response.content))
