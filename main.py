@@ -42,15 +42,20 @@ info_response = requests.get(API_URL, params=image_info_params, headers=headers)
 pages = info_response.json()["query"]["pages"]
 
 # Step 3: Download and display license info
+output_lines = []
 for page_id, page in pages.items():
     imageinfo = page.get("imageinfo", [{}])[0]
     url = imageinfo.get("url")
     metadata = imageinfo.get("extmetadata", {})
     license_name = metadata.get("LicenseShortName", {}).get("value", "Unknown")
 
-    print(f"\n📷 Title: {page['title']}")
-    print(f"🔗 URL: {url}")
-    print(f"📜 License: {license_name}")
+    line1 = f"\n📷 Title: {page['title']}"
+    line2 = f"🔗 URL: {url}"
+    line3 = f"📜 License: {license_name}"
+    print(line1)
+    print(line2)
+    print(line3)
+    output_lines.extend([line1, line2, line3])
 
     # Download and display image
     if url:
@@ -60,6 +65,14 @@ for page_id, page in pages.items():
                 img = Image.open(BytesIO(img_response.content))
                 img.show()
             except Exception as e:
-                print(f"Error opening image: {e}")
+                err = f"Error opening image: {e}"
+                print(err)
+                output_lines.append(err)
         else:
-            print(f"Failed to download image or content is not an image. Status: {img_response.status_code}, Content-Type: {img_response.headers.get('Content-Type')}")
+            err = f"Failed to download image or content is not an image. Status: {img_response.status_code}, Content-Type: {img_response.headers.get('Content-Type')}"
+            print(err)
+            output_lines.append(err)
+
+# Write output to a text file
+with open("output.txt", "w", encoding="utf-8") as f:
+    f.write("\n".join(output_lines))
